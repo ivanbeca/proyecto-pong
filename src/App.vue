@@ -1,7 +1,9 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
+import CampoJuego from './components/CampoJuego.vue'
 </script>
 
 <template>
-  <HelloWorld />
+  <main class="contenedor-juego">
+    <CampoJuego />
+  </main>
 </template>
