@@ -1,65 +1,120 @@
-<template>
-  <div class="campo-juego">
-    <div class="pelota" :style="estiloPelota"></div>
-  </div>
-</template>
-
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { usePongGame } from '../composables/usePongGame'
+import GameBoard from './game/GameBoard.vue'
+import ScoreBoard from './game/ScoreBoard.vue'
 
-const posicionX = ref(0)
-const posicionY = ref(0)
-
-const velocidadX = 3
-const velocidadY = 2
-const anchoCampo = 800
-const altoCampo = 500
-const tamanoPelota = 20
-
-let animacionId = null
-
-const estiloPelota = computed(() => ({
-  transform: `translate(${posicionX.value}px, ${posicionY.value}px)`,
-}))
-
-const moverPelota = () => {
-  posicionX.value += velocidadX
-  posicionY.value += velocidadY
-
-  if (posicionX.value > anchoCampo || posicionY.value > altoCampo) {
-    posicionX.value = -tamanoPelota
-    posicionY.value = -tamanoPelota
-  }
-
-  animacionId = requestAnimationFrame(moverPelota)
-}
-
-onMounted(() => {
-  animacionId = requestAnimationFrame(moverPelota)
-})
-
-onUnmounted(() => {
-  cancelAnimationFrame(animacionId)
-})
+const {
+  board,
+  ball,
+  player,
+  enemy,
+  score,
+  isPaused,
+  roundMessage,
+  statusText,
+  resetMatch,
+  togglePause,
+} = usePongGame()
 </script>
 
+<template>
+  <section class="pong-shell" aria-label="Juego Pong">
+    <ScoreBoard
+      :player-score="score.player"
+      :enemy-score="score.enemy"
+      :status-text="statusText"
+    />
+
+    <GameBoard
+      :board="board"
+      :ball="ball"
+      :player="player"
+      :enemy="enemy"
+      :message="roundMessage"
+    />
+
+    <footer class="game-footer">
+      <p>Jugador: W/S o flechas. Espacio para pausar.</p>
+
+      <div class="game-actions" aria-label="Acciones de partida">
+        <button type="button" @click="togglePause">
+          {{ isPaused ? 'Continuar' : 'Pausar' }}
+        </button>
+        <button type="button" class="secondary" @click="resetMatch">
+          Reiniciar
+        </button>
+      </div>
+    </footer>
+  </section>
+</template>
+
 <style scoped>
-.campo-juego {
-  width: 800px;
-  height: 500px;
-  max-width: 100%;
-  background: #000;
-  position: relative;
-  overflow: hidden;
+.pong-shell {
+  width: min(100%, 840px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
 }
 
-.pelota {
-  width: 20px;
-  height: 20px;
-  background: #fff;
-  border-radius: 50%;
-  position: absolute;
-  top: 0;
-  left: 0;
+.game-footer {
+  width: min(100%, 800px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  color: #cbd5e1;
+}
+
+.game-footer p {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.game-actions {
+  display: flex;
+  gap: 10px;
+}
+
+button {
+  min-width: 104px;
+  border: 0;
+  border-radius: 6px;
+  padding: 10px 16px;
+  background: #38bdf8;
+  color: #082f49;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+}
+
+button:hover {
+  background: #7dd3fc;
+}
+
+button.secondary {
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: transparent;
+  color: #e5e7eb;
+}
+
+button.secondary:hover {
+  background: rgba(148, 163, 184, 0.14);
+}
+
+@media (max-width: 640px) {
+  .game-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .game-actions {
+    width: 100%;
+  }
+
+  button {
+    flex: 1;
+  }
 }
 </style>
